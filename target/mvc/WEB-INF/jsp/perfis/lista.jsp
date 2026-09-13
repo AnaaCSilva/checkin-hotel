@@ -27,6 +27,10 @@
         <a class="btn" href="${pageContext.request.contextPath}/perfis?acao=novo">Novo perfil</a>
     </div>
 
+    <c:if test="${not empty erro}">
+        <div class="alert alert-erro">${erro}</div>
+    </c:if>
+
     <div class="table-wrap">
         <c:choose>
             <c:when test="${empty perfis}">

@@ -27,6 +27,10 @@
         <a class="btn" href="${pageContext.request.contextPath}/usuarios?acao=novo">Novo usuario</a>
     </div>
 
+    <c:if test="${not empty erro}">
+        <div class="alert alert-erro">${erro}</div>
+    </c:if>
+
     <div class="table-wrap">
         <c:choose>
             <c:when test="${empty usuarios}">

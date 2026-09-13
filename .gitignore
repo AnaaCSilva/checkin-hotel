@@ -1,0 +1,6 @@
+target/
+deploy/*.war
+*.class
+.vscode/
+*.log
+.DS_Store
