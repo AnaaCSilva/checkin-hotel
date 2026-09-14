@@ -6,12 +6,6 @@ import br.com.mvc.model.Usuario;
 
 import java.util.List;
 
-/**
- * SERVICE de Usuario — regras de negocio ficam aqui.
- *
- * Controller so chama estes metodos e decide a view.
- * DAO so executa SQL.
- */
 public class UsuarioService {
 
     private static final int SENHA_MINIMA = 6;
@@ -24,11 +18,11 @@ public class UsuarioService {
         this.perfilDAO = new PerfilDAO();
     }
 
-    /**
-     * Regra de autenticacao:
-     * - login e senha obrigatorios
-     * - so libera acesso se existir usuario com esse login/senha
-     */
+    public UsuarioService(UsuarioDAO usuarioDAO, PerfilDAO perfilDAO) {
+        this.usuarioDAO = usuarioDAO;
+        this.perfilDAO = perfilDAO;
+    }
+
     public Usuario autenticar(String login, String senha) {
         login = this.normalizar(login);
         senha = this.normalizar(senha);
@@ -39,7 +33,7 @@ public class UsuarioService {
 
         Usuario usuario = this.usuarioDAO.buscarPorLoginESenha(login, senha);
         if (usuario == null) {
-            throw new IllegalArgumentException("Login ou senha invalidos.");
+            throw new IllegalArgumentException("Login ou senha inválidos.");
         }
         return usuario;
     }
@@ -55,14 +49,9 @@ public class UsuarioService {
         return this.usuarioDAO.buscarPorId(id);
     }
 
-    /**
-     * Regra de salvamento:
-     * - sem id  -> cadastro novo
-     * - com id  -> alteracao (usuario precisa existir)
-     */
     public void salvar(Usuario usuario) {
         if (usuario == null) {
-            throw new IllegalArgumentException("Usuario e obrigatorio.");
+            throw new IllegalArgumentException("Usuário é obrigatório.");
         }
 
         this.prepararDados(usuario);
@@ -77,22 +66,17 @@ public class UsuarioService {
         }
 
         if (this.usuarioDAO.buscarPorId(usuario.getId()) == null) {
-            throw new IllegalArgumentException("Usuario nao encontrado para alteracao.");
+            throw new IllegalArgumentException("Usuário não encontrado para alteração.");
         }
         this.usuarioDAO.alterar(usuario);
     }
 
-    /**
-     * Regra de exclusao:
-     * - id obrigatorio
-     * - usuario precisa existir
-     */
     public void deletar(Long id) {
         if (id == null) {
-            throw new IllegalArgumentException("Id e obrigatorio para excluir.");
+            throw new IllegalArgumentException("Id é obrigatório para excluir.");
         }
         if (this.usuarioDAO.buscarPorId(id) == null) {
-            throw new IllegalArgumentException("Usuario nao encontrado.");
+            throw new IllegalArgumentException("Usuário não encontrado.");
         }
         this.usuarioDAO.deletar(id);
     }
@@ -104,51 +88,35 @@ public class UsuarioService {
     }
 
     private void validarCamposObrigatorios(Usuario usuario) {
-        if (usuario.getNome() == null) {
-            throw new IllegalArgumentException("Nome e obrigatorio.");
-        }
-        if (usuario.getLogin() == null) {
-            throw new IllegalArgumentException("Login e obrigatorio.");
-        }
-        if (usuario.getSenha() == null) {
-            throw new IllegalArgumentException("Senha e obrigatoria.");
-        }
-        if (usuario.getPerfilId() == null) {
-            throw new IllegalArgumentException("Perfil e obrigatorio.");
-        }
+        if (usuario.getNome() == null) throw new IllegalArgumentException("Nome é obrigatório.");
+        if (usuario.getLogin() == null) throw new IllegalArgumentException("Login é obrigatório.");
+        if (usuario.getSenha() == null) throw new IllegalArgumentException("Senha é obrigatória.");
+        if (usuario.getPerfilId() == null) throw new IllegalArgumentException("Perfil é obrigatório.");
     }
 
     private void validarSenha(String senha) {
         if (senha.length() < SENHA_MINIMA) {
-            throw new IllegalArgumentException("Senha deve ter no minimo " + SENHA_MINIMA + " caracteres.");
+            throw new IllegalArgumentException("Senha deve ter no mínimo " + SENHA_MINIMA + " caracteres.");
         }
     }
 
     private void validarPerfilExistente(Long perfilId) {
         if (this.perfilDAO.buscarPorId(perfilId) == null) {
-            throw new IllegalArgumentException("Perfil informado nao existe.");
+            throw new IllegalArgumentException("Perfil informado não existe.");
         }
     }
 
     private void validarLoginUnico(Usuario usuario) {
         Usuario existente = this.usuarioDAO.buscarPorLogin(usuario.getLogin());
-        if (existente == null) {
-            return;
-        }
-        // no cadastro, qualquer login repetido e invalido
-        if (usuario.getId() == null) {
-            throw new IllegalArgumentException("Ja existe um usuario com este login.");
-        }
-        // na alteracao, so permite se o login for do proprio usuario
-        if (!existente.getId().equals(usuario.getId())) {
-            throw new IllegalArgumentException("Ja existe um usuario com este login.");
+        if (existente == null) return;
+        
+        if (usuario.getId() == null || !existente.getId().equals(usuario.getId())) {
+            throw new IllegalArgumentException("Já existe um usuário com este login.");
         }
     }
 
     private String normalizar(String valor) {
-        if (valor == null) {
-            return null;
-        }
+        if (valor == null) return null;
         String limpo = valor.trim();
         return limpo.isEmpty() ? null : limpo;
     }

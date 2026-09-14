@@ -5,15 +5,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Home - MVC Aula</title>
+    <title>Painel - Check-in Hotel</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/estilo.css">
 </head>
 <body>
 <header class="topbar">
     <div class="container">
-        <strong>MVC Aula</strong>
+        <strong>Check-in Hotel</strong>
         <nav>
-            <span>${usuarioLogado.nome} (${usuarioLogado.perfil.nome})</span>
+            <a href="${pageContext.request.contextPath}/home">Home</a>
+            <a href="${pageContext.request.contextPath}/hospedes">Hóspedes</a>
+            <a href="${pageContext.request.contextPath}/quartos">Quartos</a>
+            <a href="${pageContext.request.contextPath}/usuarios">Usuários</a>
+            <a href="${pageContext.request.contextPath}/perfis">Perfis</a>
             <a href="${pageContext.request.contextPath}/logout">Sair</a>
         </nav>
     </div>
@@ -21,24 +25,30 @@
 
 <main class="container">
     <div class="page-header">
-        <h1>Painel</h1>
+        <h1>Painel Principal</h1>
     </div>
 
     <div class="grid-cards">
         <a class="menu-card" href="${pageContext.request.contextPath}/hospedes">
-            <strong>Hospedes</strong>
-            <span>Listar, cadastrar, editar e excluir hospedes.</span>
+            <strong>Hóspedes</strong>
+            <span>Listar, cadastrar, editar e excluir hóspedes.</span>
         </a>
+
+        <a class="menu-card" href="${pageContext.request.contextPath}/quartos">
+            <strong>Quartos</strong>
+            <span>Listar, cadastrar, editar e gerenciar status dos quartos.</span>
+        </a>
+
         <a class="menu-card" href="${pageContext.request.contextPath}/usuarios">
-            <strong>Usuarios</strong>
-            <span>Listar, cadastrar, editar e excluir usuarios.</span>
+            <strong>Usuários</strong>
+            <span>Listar, cadastrar, editar e excluir usuários.</span>
         </a>
+
         <a class="menu-card" href="${pageContext.request.contextPath}/perfis">
             <strong>Perfis</strong>
-            <span>Listar, cadastrar, editar e excluir perfis.</span>
+            <span>Listar, cadastrar, editar e excluir perfis de acesso.</span>
         </a>
     </div>
-
 </main>
 </body>
 </html>

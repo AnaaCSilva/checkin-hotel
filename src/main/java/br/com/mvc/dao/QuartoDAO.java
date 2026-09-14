@@ -2,6 +2,8 @@ package br.com.mvc.dao;
 
 import br.com.mvc.model.Quarto;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -9,14 +11,13 @@ import java.util.List;
 
 public class QuartoDAO extends MysqlDAO {
 
-    public QuartoDAO() {
-        super();
-    }
-
     public List<Quarto> listarTodos() {
         String sql = "SELECT id, numero, tipo, status FROM quartos ORDER BY numero";
         List<Quarto> lista = new ArrayList<>();
-        try (ResultSet rs = super.executar(sql)) {
+        try (Connection conn = super.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            
             while (rs.next()) {
                 lista.add(this.mapear(rs));
             }
@@ -28,9 +29,14 @@ public class QuartoDAO extends MysqlDAO {
 
     public Quarto buscarPorId(Long id) {
         String sql = "SELECT id, numero, tipo, status FROM quartos WHERE id = ?";
-        try (ResultSet rs = super.executar(sql, id)) {
-            if (rs.next()) {
-                return this.mapear(rs);
+        try (Connection conn = super.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            super.preencherParametros(stmt, id);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return this.mapear(rs);
+                }
             }
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao buscar por id.", e);
@@ -40,9 +46,14 @@ public class QuartoDAO extends MysqlDAO {
 
     public Quarto buscarPorNumero(String numero) {
         String sql = "SELECT id, numero, tipo, status FROM quartos WHERE numero = ?";
-        try (ResultSet rs = super.executar(sql, numero)) {
-            if (rs.next()) {
-                return this.mapear(rs);
+        try (Connection conn = super.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            super.preencherParametros(stmt, numero);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return this.mapear(rs);
+                }
             }
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao buscar por numero.", e);
@@ -55,7 +66,7 @@ public class QuartoDAO extends MysqlDAO {
         try {
             super.executarUpdate(sql, quarto.getNumero(), quarto.getTipo(), quarto.getStatus());
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao inserir.", e);
+            throw new RuntimeException("Erro ao inserir quarto.", e);
         }
     }
 
@@ -64,7 +75,7 @@ public class QuartoDAO extends MysqlDAO {
         try {
             super.executarUpdate(sql, quarto.getNumero(), quarto.getTipo(), quarto.getStatus(), quarto.getId());
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao alterar.", e);
+            throw new RuntimeException("Erro ao alterar quarto.", e);
         }
     }
 
@@ -73,7 +84,7 @@ public class QuartoDAO extends MysqlDAO {
         try {
             super.executarUpdate(sql, id);
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao deletar.", e);
+            throw new RuntimeException("Erro ao deletar quarto.", e);
         }
     }
 
@@ -83,6 +94,6 @@ public class QuartoDAO extends MysqlDAO {
         quarto.setNumero(rs.getString("numero"));
         quarto.setTipo(rs.getString("tipo"));
         quarto.setStatus(rs.getString("status"));
-    return quarto;
-}
+        return quarto;
+    }
 }

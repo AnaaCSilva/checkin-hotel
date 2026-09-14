@@ -1,22 +1,26 @@
-package service;
+package br.com.mvc.service;
 
-import dao.QuartoDAO;
-import model.Quarto;
+import br.com.mvc.dao.QuartoDAO;
+import br.com.mvc.model.Quarto;
 import java.util.List;
 
 public class QuartoService {
 
-    private QuartoDAO quartoDAO;
+    private final QuartoDAO quartoDAO;
 
     public QuartoService() {
         this.quartoDAO = new QuartoDAO();
+    }
+
+    public QuartoService(QuartoDAO quartoDAO) {
+        this.quartoDAO = quartoDAO;
     }
 
     public List<Quarto> listarTodos() {
         return quartoDAO.listarTodos();
     }
 
-    public Quarto buscarPorId(Integer id) {
+    public Quarto buscarPorId(Long id) {
         if (id == null) {
             throw new IllegalArgumentException("ID do quarto não pode ser nulo.");
         }
@@ -24,61 +28,63 @@ public class QuartoService {
     }
 
     public void salvar(Quarto quarto) {
-        // Validações básicas de campos obrigatórios
-        if (quarto.getNumero() == null || quarto.getNumero().trim().isEmpty()) {
+        if (quarto == null) {
+            throw new IllegalArgumentException("Quarto é obrigatório.");
+        }
+        
+        quarto.setNumero(normalizar(quarto.getNumero()));
+        quarto.setTipo(normalizar(quarto.getTipo()));
+
+        if (quarto.getNumero() == null) {
             throw new IllegalArgumentException("O número do quarto é obrigatório.");
         }
-        if (quarto.getTipo() == null || quarto.getTipo().trim().isEmpty()) {
+        if (quarto.getTipo() == null) {
             throw new IllegalArgumentException("O tipo do quarto é obrigatório.");
         }
 
-        // Regra de negócio: Número único
         validarNumeroUnico(quarto);
 
         if (quarto.getId() == null) {
-            // Se não tem ID, define status inicial como "Disponível" e insere
-            if (quarto.getStatus() == null) {
+            if (quarto.getStatus() == null || quarto.getStatus().trim().isEmpty()) {
                 quarto.setStatus("Disponível");
             }
             quartoDAO.inserir(quarto);
         } else {
-            // Se já tem ID, atualiza o registro existente
-            quartoDAO.atualizar(quarto);
+            quartoDAO.alterar(quarto);
         }
+    }
+
+    public void excluir(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("ID inválido para exclusão.");
+        }
+        
+        Quarto quarto = quartoDAO.buscarPorId(id);
+        if (quarto == null) {
+            throw new IllegalArgumentException("Quarto não encontrado.");
+        }
+        if ("Ocupado".equalsIgnoreCase(quarto.getStatus())) {
+            throw new IllegalArgumentException("Não é possível excluir um quarto que está ocupado.");
+        }
+
+        quartoDAO.deletar(id);
     }
 
     private void validarNumeroUnico(Quarto quarto) {
         Quarto existente = quartoDAO.buscarPorNumero(quarto.getNumero());
 
-        // 1. Se ninguém usa esse número ainda, está liberado
         if (existente == null) {
             return;
         }
 
-        // 2. Se é um cadastro NOVO e o número já existe -> Erro
-        if (quarto.getId() == null) {
-            throw new IllegalArgumentException("Já existe um quarto cadastrado com este número.");
+        if (quarto.getId() == null || !existente.getId().equals(quarto.getId())) {
+            throw new IllegalArgumentException("Já existe um quarto registrado com este número.");
         }
-
-        // 3. Se é EDIÇÃO e o número pertence a OUTRO quarto (IDs diferentes) -> Erro
-        if (!existente.getId().equals(quarto.getId())) {
-            throw new IllegalArgumentException("Já existe outro quarto registrado com este número.");
-        }
-
-        // 4. Se o ID é o mesmo (é o próprio quarto sendo editado) -> Permite salvar!
     }
 
-    public void excluir(Integer id) {
-        if (id == null) {
-            throw new IllegalArgumentException("ID inválido para exclusão.");
-        }
-        
-        // Regra de segurança: Não permitir excluir quarto se estiver ocupado
-        Quarto quarto = quartoDAO.buscarPorId(id);
-        if (quarto != null && "Ocupado".equalsIgnoreCase(quarto.getStatus())) {
-            throw new IllegalArgumentException("Não é possível excluir um quarto que está ocupado.");
-        }
-
-        quartoDAO.deletar(id);
+    private String normalizar(String valor) {
+        if (valor == null) return null;
+        String limpo = valor.trim();
+        return limpo.isEmpty() ? null : limpo;
     }
 }
