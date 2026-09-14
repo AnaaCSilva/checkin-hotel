@@ -25,6 +25,10 @@
     </div>
 
     <div class="grid-cards">
+        <a class="menu-card" href="${pageContext.request.contextPath}/hospedes">
+            <strong>Hospedes</strong>
+            <span>Listar, cadastrar, editar e excluir hospedes.</span>
+        </a>
         <a class="menu-card" href="${pageContext.request.contextPath}/usuarios">
             <strong>Usuarios</strong>
             <span>Listar, cadastrar, editar e excluir usuarios.</span>
@@ -34,6 +38,7 @@
             <span>Listar, cadastrar, editar e excluir perfis.</span>
         </a>
     </div>
+
 </main>
 </body>
 </html>

@@ -41,16 +41,20 @@
 -- =========================================
 
     CREATE TABLE hospedes (
-        id BIGINT NOT NULL AUTO_INCREMENT,
-        nome VARCHAR(150) NOT NULL,
-        cpf VARCHAR(14) NOT NULL,
-        telefone VARCHAR(20),
-        email VARCHAR(150),
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    nome VARCHAR(150) NOT NULL,
+    tipo_documento VARCHAR(20) NOT NULL,
+    numero_documento VARCHAR(30) NOT NULL,
+    telefone VARCHAR(20),
+    email VARCHAR(150),
 
-        PRIMARY KEY (id),
+    PRIMARY KEY (id),
 
-        CONSTRAINT uk_hospede_cpf
-            UNIQUE (cpf)
+    CONSTRAINT uk_hospede_documento
+        UNIQUE (numero_documento),
+
+    CONSTRAINT chk_hospede_tipo_documento
+        CHECK (tipo_documento IN ('CPF', 'PASSAPORTE'))
     );
 
 -- =========================================
@@ -75,11 +79,10 @@
         ('Recepcionista Turno 1', 'recepcao1', '123456', 2),
         ('Recepcionista Turno 2', 'recepcao2', '123456', 3);
 
-    INSERT INTO hospedes (nome, cpf, telefone, email)
+    INSERT INTO hospedes (nome, tipo_documento, numero_documento, telefone, email)
     VALUES
-        ('Carlos Silva', '111.111.111-11', '(34) 99999-0001', 'carlos@email.com'),
-        ('Ana Souza', '222.222.222-22', '(34) 99999-0002', 'ana@email.com');
-
+        ('Carlos Silva', 'CPF', '111.111.111-11', '(34) 99999-0001', 'carlos@email.com'),
+        ('Ana Souza', 'PASSAPORTE', 'AB123456', '(34) 99999-0002', 'ana@email.com');
 
 -- =========================================
 -- CONSULTA DE EXEMPLO

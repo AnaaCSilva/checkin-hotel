@@ -4,6 +4,7 @@ import br.com.mvc.dao.HospedeDAO;
 import br.com.mvc.model.Hospede;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * SERVICE de Hospede — regras de negocio ficam aqui.
@@ -12,6 +13,8 @@ import java.util.List;
  * DAO so executa SQL.
  */
 public class HospedeService {
+
+    private static final Set<String> TIPOS_VALIDOS = Set.of("CPF", "PASSAPORTE");
 
     private final HospedeDAO hospedeDAO;
 
@@ -42,7 +45,8 @@ public class HospedeService {
 
         this.prepararDados(hospede);
         this.validarCamposObrigatorios(hospede);
-        this.validarCpfUnico(hospede);
+        this.validarTipoDocumento(hospede.getTipoDocumento());
+        this.validarDocumentoUnico(hospede);
 
         if (hospede.getId() == null) {
             this.hospedeDAO.inserir(hospede);
@@ -67,7 +71,8 @@ public class HospedeService {
 
     private void prepararDados(Hospede hospede) {
         hospede.setNome(this.normalizar(hospede.getNome()));
-        hospede.setCpf(this.normalizar(hospede.getCpf()));
+        hospede.setTipoDocumento(this.normalizarMaiusculo(hospede.getTipoDocumento()));
+        hospede.setNumeroDocumento(this.normalizar(hospede.getNumeroDocumento()));
         hospede.setTelefone(this.normalizar(hospede.getTelefone()));
         hospede.setEmail(this.normalizar(hospede.getEmail()));
     }
@@ -76,21 +81,30 @@ public class HospedeService {
         if (hospede.getNome() == null) {
             throw new IllegalArgumentException("Nome e obrigatorio.");
         }
-        if (hospede.getCpf() == null) {
-            throw new IllegalArgumentException("CPF e obrigatorio.");
+        if (hospede.getTipoDocumento() == null) {
+            throw new IllegalArgumentException("Tipo de documento e obrigatorio.");
+        }
+        if (hospede.getNumeroDocumento() == null) {
+            throw new IllegalArgumentException("Numero do documento e obrigatorio.");
         }
     }
 
-    private void validarCpfUnico(Hospede hospede) {
-        Hospede existente = this.hospedeDAO.buscarPorCpf(hospede.getCpf());
+    private void validarTipoDocumento(String tipoDocumento) {
+        if (!TIPOS_VALIDOS.contains(tipoDocumento)) {
+            throw new IllegalArgumentException("Tipo de documento deve ser CPF ou PASSAPORTE.");
+        }
+    }
+
+    private void validarDocumentoUnico(Hospede hospede) {
+        Hospede existente = this.hospedeDAO.buscarPorNumeroDocumento(hospede.getNumeroDocumento());
         if (existente == null) {
             return;
         }
         if (hospede.getId() == null) {
-            throw new IllegalArgumentException("Ja existe um hospede com este CPF.");
+            throw new IllegalArgumentException("Ja existe um hospede com este documento.");
         }
         if (!existente.getId().equals(hospede.getId())) {
-            throw new IllegalArgumentException("Ja existe um hospede com este CPF.");
+            throw new IllegalArgumentException("Ja existe um hospede com este documento.");
         }
     }
 
@@ -100,5 +114,10 @@ public class HospedeService {
         }
         String limpo = valor.trim();
         return limpo.isEmpty() ? null : limpo;
+    }
+
+    private String normalizarMaiusculo(String valor) {
+        String limpo = this.normalizar(valor);
+        return limpo == null ? null : limpo.toUpperCase();
     }
 }

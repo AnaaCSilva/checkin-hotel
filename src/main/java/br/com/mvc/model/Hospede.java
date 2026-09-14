@@ -4,7 +4,8 @@ public class Hospede {
 
     private Long id;
     private String nome;
-    private String cpf;
+    private String tipoDocumento;
+    private String numeroDocumento;
     private String telefone;
     private String email;
 
@@ -24,12 +25,20 @@ public class Hospede {
         this.nome = nome;
     }
 
-    public String getCpf() {
-        return cpf;
+    public String getTipoDocumento() {
+        return tipoDocumento;
     }
 
-    public void setCpf(String cpf) {
-        this.cpf = cpf;
+    public void setTipoDocumento(String tipoDocumento) {
+        this.tipoDocumento = tipoDocumento;
+    }
+
+    public String getNumeroDocumento() {
+        return numeroDocumento;
+    }
+
+    public void setNumeroDocumento(String numeroDocumento) {
+        this.numeroDocumento = numeroDocumento;
     }
 
     public String getTelefone() {
