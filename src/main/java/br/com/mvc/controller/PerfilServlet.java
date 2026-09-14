@@ -28,17 +28,6 @@ public class PerfilServlet extends BaseServlet {
         switch (this.acao(req)) {
             case "novo" -> this.form(req, resp, null);
             case "editar" -> this.form(req, resp, this.perfilService.buscarPorId(this.paramLong(req, "id")));
-            case "excluir" -> {
-                try {
-                    this.perfilService.deletar(this.paramLong(req, "id"));
-                } catch (IllegalArgumentException e) {
-                    req.setAttribute("erro", e.getMessage());
-                    req.setAttribute("perfis", this.perfilService.listar());
-                    this.forward(req, resp, LISTA);
-                    return;
-                }
-                this.redirect(req, resp, "/perfis");
-            }
             default -> {
                 req.setAttribute("perfis", this.perfilService.listar());
                 this.forward(req, resp, LISTA);
@@ -51,12 +40,25 @@ public class PerfilServlet extends BaseServlet {
             throws ServletException, IOException {
 
         req.setCharacterEncoding("UTF-8");
+
+        if ("excluir".equals(this.acao(req))) {
+            try {
+                this.perfilService.deletar(this.paramLong(req, "id"));
+                this.redirect(req, resp, "/perfis");
+            } catch (Exception e) {
+                req.setAttribute("erro", e.getMessage());
+                req.setAttribute("perfis", this.perfilService.listar());
+                this.forward(req, resp, LISTA);
+            }
+            return;
+        }
+
         Perfil perfil = this.fromRequest(req);
 
         try {
             this.perfilService.salvar(perfil);
             this.redirect(req, resp, "/perfis");
-        } catch (IllegalArgumentException e) {
+        } catch (Exception e) {
             req.setAttribute("erro", e.getMessage());
             this.form(req, resp, perfil);
         }

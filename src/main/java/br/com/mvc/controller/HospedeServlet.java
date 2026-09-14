@@ -24,17 +24,6 @@ public class HospedeServlet extends BaseServlet {
         switch (this.acao(req)) {
             case "novo" -> this.form(req, resp, null);
             case "editar" -> this.form(req, resp, this.hospedeService.buscarPorId(this.paramLong(req, "id")));
-            case "excluir" -> {
-                try {
-                    this.hospedeService.deletar(this.paramLong(req, "id"));
-                } catch (IllegalArgumentException e) {
-                    req.setAttribute("erro", e.getMessage());
-                    req.setAttribute("hospedes", this.hospedeService.listar());
-                    this.forward(req, resp, LISTA);
-                    return;
-                }
-                this.redirect(req, resp, "/hospedes");
-            }
             default -> {
                 req.setAttribute("hospedes", this.hospedeService.listar());
                 this.forward(req, resp, LISTA);
@@ -47,12 +36,25 @@ public class HospedeServlet extends BaseServlet {
             throws ServletException, IOException {
 
         req.setCharacterEncoding("UTF-8");
+
+        if ("excluir".equals(this.acao(req))) {
+            try {
+                this.hospedeService.deletar(this.paramLong(req, "id"));
+                this.redirect(req, resp, "/hospedes");
+            } catch (Exception e) {
+                req.setAttribute("erro", e.getMessage());
+                req.setAttribute("hospedes", this.hospedeService.listar());
+                this.forward(req, resp, LISTA);
+            }
+            return;
+        }
+
         Hospede hospede = this.fromRequest(req);
 
         try {
             this.hospedeService.salvar(hospede);
             this.redirect(req, resp, "/hospedes");
-        } catch (IllegalArgumentException e) {
+        } catch (Exception e) {
             req.setAttribute("erro", e.getMessage());
             this.form(req, resp, hospede);
         }

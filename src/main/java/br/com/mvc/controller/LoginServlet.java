@@ -46,9 +46,16 @@ public class LoginServlet extends BaseServlet {
                     this.param(req, "login"),
                     this.param(req, "senha"));
 
-            req.getSession(true).setAttribute("usuarioLogado", usuario);
+            // Prevenção contra Session Fixation
+            HttpSession oldSession = req.getSession(false);
+            if (oldSession != null) {
+                oldSession.invalidate();
+            }
+
+            HttpSession newSession = req.getSession(true);
+            newSession.setAttribute("usuarioLogado", usuario);
             this.redirect(req, resp, "/home");
-        } catch (IllegalArgumentException e) {
+        } catch (Exception e) {
             req.setAttribute("erro", e.getMessage());
             this.forward(req, resp, VIEW);
         }

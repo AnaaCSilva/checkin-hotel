@@ -30,17 +30,6 @@ public class UsuarioServlet extends BaseServlet {
         switch (this.acao(req)) {
             case "novo" -> this.form(req, resp, null);
             case "editar" -> this.form(req, resp, this.usuarioService.buscarPorId(this.paramLong(req, "id")));
-            case "excluir" -> {
-                try {
-                    this.usuarioService.deletar(this.paramLong(req, "id"));
-                } catch (IllegalArgumentException e) {
-                    req.setAttribute("erro", e.getMessage());
-                    req.setAttribute("usuarios", this.usuarioService.listar());
-                    this.forward(req, resp, LISTA);
-                    return;
-                }
-                this.redirect(req, resp, "/usuarios");
-            }
             default -> {
                 req.setAttribute("usuarios", this.usuarioService.listar());
                 this.forward(req, resp, LISTA);
@@ -53,12 +42,25 @@ public class UsuarioServlet extends BaseServlet {
             throws ServletException, IOException {
 
         req.setCharacterEncoding("UTF-8");
+
+        if ("excluir".equals(this.acao(req))) {
+            try {
+                this.usuarioService.deletar(this.paramLong(req, "id"));
+                this.redirect(req, resp, "/usuarios");
+            } catch (Exception e) {
+                req.setAttribute("erro", e.getMessage());
+                req.setAttribute("usuarios", this.usuarioService.listar());
+                this.forward(req, resp, LISTA);
+            }
+            return;
+        }
+
         Usuario usuario = this.fromRequest(req);
 
         try {
             this.usuarioService.salvar(usuario);
             this.redirect(req, resp, "/usuarios");
-        } catch (IllegalArgumentException e) {
+        } catch (Exception e) {
             req.setAttribute("erro", e.getMessage());
             this.form(req, resp, usuario);
         }
@@ -82,7 +84,12 @@ public class UsuarioServlet extends BaseServlet {
         usuario.setId(this.paramLong(req, "id"));
         usuario.setNome(this.param(req, "nome"));
         usuario.setLogin(this.param(req, "login"));
-        usuario.setSenha(this.param(req, "senha"));
+        
+        String senha = this.param(req, "senha");
+        if (senha != null && !senha.isBlank()) {
+            usuario.setSenha(senha);
+        }
+        
         usuario.setPerfilId(this.paramLong(req, "perfilId"));
         return usuario;
     }
