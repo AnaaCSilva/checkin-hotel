@@ -24,6 +24,17 @@ public class HospedeServlet extends BaseServlet {
         switch (this.acao(req)) {
             case "novo" -> this.form(req, resp, null);
             case "editar" -> this.form(req, resp, this.hospedeService.buscarPorId(this.paramLong(req, "id")));
+            case "excluir" -> {
+                try {
+                    this.hospedeService.deletar(this.paramLong(req, "id"));
+                } catch (IllegalArgumentException e) {
+                    req.setAttribute("erro", e.getMessage());
+                    req.setAttribute("hospedes", this.hospedeService.listar());
+                    this.forward(req, resp, LISTA);
+                    return;
+                }
+                this.redirect(req, resp, "/hospedes");
+            }
             default -> {
                 req.setAttribute("hospedes", this.hospedeService.listar());
                 this.forward(req, resp, LISTA);
@@ -36,25 +47,12 @@ public class HospedeServlet extends BaseServlet {
             throws ServletException, IOException {
 
         req.setCharacterEncoding("UTF-8");
-
-        if ("excluir".equals(this.acao(req))) {
-            try {
-                this.hospedeService.deletar(this.paramLong(req, "id"));
-                this.redirect(req, resp, "/hospedes");
-            } catch (Exception e) {
-                req.setAttribute("erro", e.getMessage());
-                req.setAttribute("hospedes", this.hospedeService.listar());
-                this.forward(req, resp, LISTA);
-            }
-            return;
-        }
-
         Hospede hospede = this.fromRequest(req);
 
         try {
             this.hospedeService.salvar(hospede);
             this.redirect(req, resp, "/hospedes");
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             req.setAttribute("erro", e.getMessage());
             this.form(req, resp, hospede);
         }
@@ -76,7 +74,8 @@ public class HospedeServlet extends BaseServlet {
         Hospede hospede = new Hospede();
         hospede.setId(this.paramLong(req, "id"));
         hospede.setNome(this.param(req, "nome"));
-        hospede.setCpf(this.param(req, "cpf"));
+        hospede.setTipoDocumento(this.param(req, "tipoDocumento"));
+        hospede.setNumeroDocumento(this.param(req, "numeroDocumento"));
         hospede.setTelefone(this.param(req, "telefone"));
         hospede.setEmail(this.param(req, "email"));
         return hospede;

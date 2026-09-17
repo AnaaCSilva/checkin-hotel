@@ -35,6 +35,36 @@
             FOREIGN KEY (perfil_id)
             REFERENCES perfis(id)
     );
+    
+    -- =========================================
+    -- TABELA DE CHECKIN
+    -- =========================================
+
+    CREATE TABLE checkin (
+        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+        hospede_id BIGINT NOT NULL,
+        quarto_id BIGINT NOT NULL,
+        data_checkin DATETIME NOT NULL,
+        data_checkout DATETIME NULL,
+        FOREIGN KEY (hospede_id) REFERENCES hospedes(id),
+        FOREIGN KEY (quarto_id) REFERENCES quartos(id)
+);
+
+    -- =========================================
+    -- TABELA DE QUARTOS
+    -- =========================================
+
+    CREATE TABLE quartos (
+        id BIGINT NOT NULL AUTO_INCREMENT,
+        numero VARCHAR(10) NOT NULL,
+        tipo VARCHAR(50) NOT NULL,
+        status VARCHAR(20) NOT NULL DEFAULT 'Disponível',
+
+        PRIMARY KEY (id),
+
+        CONSTRAINT uk_quarto_numero
+            UNIQUE (numero)
+    );
 
 -- =========================================
 -- TABELA DE HÓSPEDES
@@ -84,6 +114,12 @@
         ('Carlos Silva', 'CPF', '111.111.111-11', '(34) 99999-0001', 'carlos@email.com'),
         ('Ana Souza', 'PASSAPORTE', 'AB123456', '(34) 99999-0002', 'ana@email.com');
 
+
+    INSERT INTO quartos (numero, tipo, status)
+    VALUES
+        ('101', 'Solteiro', 'Disponível'),
+        ('102', 'Casal', 'Disponível'),
+        ('201', 'Suíte', 'Manutenção');
 -- =========================================
 -- CONSULTA DE EXEMPLO
 -- =========================================

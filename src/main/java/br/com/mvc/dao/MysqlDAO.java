@@ -2,32 +2,28 @@ package br.com.mvc.dao;
 
 import br.com.mvc.config.MysqlSingleton;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * Classe base dos DAOs.
- * Garante que Connection e PreparedStatement sejam fechados a cada operacao.
+ * Classe base dos DAOs que usam MySQL.
+ *
+ * Guarda referencia ao {@link MysqlSingleton} (uma conexao reutilizada).
+ * Os DAOs filhos usam executar() para SELECT e executarUpdate() para INSERT/UPDATE/DELETE.
  */
-public abstract class MysqlDAO {
+public class MysqlDAO {
 
-    protected Connection getConnection() throws SQLException {
-        return MysqlSingleton.getInstance().getConnection();
+    protected final MysqlSingleton banco;
+
+    public MysqlDAO() {
+        this.banco = MysqlSingleton.getInstance();
     }
 
-    protected void preencherParametros(PreparedStatement stmt, Object... parametros) throws SQLException {
-        for (int i = 0; i < parametros.length; i++) {
-            stmt.setObject(i + 1, parametros[i]);
-        }
+    protected ResultSet executar(String sql, Object... parametros) throws SQLException {
+        return this.banco.executar(sql, parametros);
     }
 
     protected int executarUpdate(String sql, Object... parametros) throws SQLException {
-        try (Connection conn = this.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            this.preencherParametros(stmt, parametros);
-            return stmt.executeUpdate();
-        }
+        return this.banco.executarUpdate(sql, parametros);
     }
 }

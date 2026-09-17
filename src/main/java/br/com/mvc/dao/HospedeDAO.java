@@ -2,22 +2,26 @@ package br.com.mvc.dao;
 
 import br.com.mvc.model.Hospede;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * DAO = Data Access Object (acesso ao banco)
+ *
+ * Somente SQL e conversao ResultSet -> {@link Hospede}.
+ */
 public class HospedeDAO extends MysqlDAO {
+
+    public HospedeDAO() {
+        super();
+    }
 
     public List<Hospede> listarTodos() {
         String sql = "SELECT id, nome, tipo_documento, numero_documento, telefone, email FROM hospedes ORDER BY nome";
         List<Hospede> lista = new ArrayList<>();
-        try (Connection conn = super.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-            
+        try (ResultSet rs = super.executar(sql)) {
             while (rs.next()) {
                 lista.add(this.mapear(rs));
             }
@@ -29,14 +33,9 @@ public class HospedeDAO extends MysqlDAO {
 
     public Hospede buscarPorId(Long id) {
         String sql = "SELECT id, nome, tipo_documento, numero_documento, telefone, email FROM hospedes WHERE id = ?";
-        try (Connection conn = super.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            super.preencherParametros(stmt, id);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return this.mapear(rs);
-                }
+        try (ResultSet rs = super.executar(sql, id)) {
+            if (rs.next()) {
+                return this.mapear(rs);
             }
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao buscar por id.", e);
@@ -46,14 +45,9 @@ public class HospedeDAO extends MysqlDAO {
 
     public Hospede buscarPorNumeroDocumento(String numeroDocumento) {
         String sql = "SELECT id, nome, tipo_documento, numero_documento, telefone, email FROM hospedes WHERE numero_documento = ?";
-        try (Connection conn = super.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            super.preencherParametros(stmt, numeroDocumento);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return this.mapear(rs);
-                }
+        try (ResultSet rs = super.executar(sql, numeroDocumento)) {
+            if (rs.next()) {
+                return this.mapear(rs);
             }
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao buscar por documento.", e);
@@ -72,7 +66,7 @@ public class HospedeDAO extends MysqlDAO {
                     hospede.getTelefone(),
                     hospede.getEmail());
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao inserir hospede.", e);
+            throw new RuntimeException("Erro ao inserir.", e);
         }
     }
 
@@ -88,7 +82,7 @@ public class HospedeDAO extends MysqlDAO {
                     hospede.getEmail(),
                     hospede.getId());
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao alterar hospede.", e);
+            throw new RuntimeException("Erro ao alterar.", e);
         }
     }
 
@@ -97,7 +91,7 @@ public class HospedeDAO extends MysqlDAO {
         try {
             super.executarUpdate(sql, id);
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao deletar hospede.", e);
+            throw new RuntimeException("Erro ao deletar.", e);
         }
     }
 

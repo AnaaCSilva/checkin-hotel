@@ -2,22 +2,27 @@ package br.com.mvc.dao;
 
 import br.com.mvc.model.Perfil;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * DAO = Data Access Object (acesso ao banco)
+ *
+ * Somente SQL e conversao ResultSet -> {@link Perfil}.
+ * Quem decide "quando" chamar cada metodo e o Service / Controller.
+ */
 public class PerfilDAO extends MysqlDAO {
+
+    public PerfilDAO() {
+        super();
+    }
 
     public List<Perfil> listarTodos() {
         String sql = "SELECT id, nome FROM perfis ORDER BY id";
         List<Perfil> lista = new ArrayList<>();
-        try (Connection conn = super.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-            
+        try (ResultSet rs = super.executar(sql)) {
             while (rs.next()) {
                 lista.add(this.mapear(rs));
             }
@@ -29,14 +34,9 @@ public class PerfilDAO extends MysqlDAO {
 
     public Perfil buscarPorId(Long id) {
         String sql = "SELECT id, nome FROM perfis WHERE id = ?";
-        try (Connection conn = super.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            super.preencherParametros(stmt, id);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return this.mapear(rs);
-                }
+        try (ResultSet rs = super.executar(sql, id)) {
+            if (rs.next()) {
+                return this.mapear(rs);
             }
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao buscar perfil por id.", e);
@@ -46,14 +46,9 @@ public class PerfilDAO extends MysqlDAO {
 
     public Perfil buscarPorNome(String nome) {
         String sql = "SELECT id, nome FROM perfis WHERE nome = ?";
-        try (Connection conn = super.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            super.preencherParametros(stmt, nome);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return this.mapear(rs);
-                }
+        try (ResultSet rs = super.executar(sql, nome)) {
+            if (rs.next()) {
+                return this.mapear(rs);
             }
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao buscar perfil por nome.", e);
