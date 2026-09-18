@@ -1,73 +1,69 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Quartos - Check-in Hotel</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/estilo.css">
-</head>
-<body>
-    <header class="topbar">
-        <div class="container">
-            <strong>Check-in Hotel</strong>
-            <nav>
-                <a href="${pageContext.request.contextPath}/home">Home</a>
-                <a href="${pageContext.request.contextPath}/hospedes">Hóspedes</a>
-                <a href="${pageContext.request.contextPath}/quartos">Quartos</a>
-                <a href="${pageContext.request.contextPath}/usuarios">Usuários</a>
-                <a href="${pageContext.request.contextPath}/perfis">Perfis</a>
-                <a href="${pageContext.request.contextPath}/logout">Sair</a>
-            </nav>
-        </div>
-    </header>
+<jsp:include page="/WEB-INF/jsp/layout/cabecalho.jsp">
+    <jsp:param name="titulo" value="Quartos" />
+    <jsp:param name="ativo" value="quartos" />
+</jsp:include>
 
-    <main class="container">
-        <div class="page-header">
-            <h1>Quartos</h1>
-            <a class="btn" href="${pageContext.request.contextPath}/quartos?acao=novo">Novo quarto</a>
-        </div>
+<div class="secao-cabecalho">
+    <div>
+        <h2>Quartos</h2>
+        <p>Número, tipo e disponibilidade de cada quarto do hotel.</p>
+    </div>
+    <a class="botao" href="${ctx}/quartos?acao=novo">+ Novo quarto</a>
+</div>
 
-        <c:if test="${not empty erro}">
-            <div class="alert alert-erro">${erro}</div>
-        </c:if>
+<c:if test="${not empty erro}">
+    <div class="aviso aviso--erro">${erro}</div>
+</c:if>
 
-        <div class="table-wrap">
-            <c:choose>
-                <c:when test="${empty quartos}">
-                    <p class="empty">Nenhum quarto cadastrado.</p>
-                </c:when>
-                <c:otherwise>
-                    <table>
-                        <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Número</th>
-                            <th>Tipo</th>
-                            <th>Status</th>
-                            <th>Ações</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <c:forEach var="quarto" items="${quartos}">
-                            <tr>
-                                <td>${quarto.id}</td>
-                                <td>${quarto.numero}</td>
-                                <td>${quarto.tipo}</td>
-                                <td>${quarto.status}</td>
-                                <td class="links">
-                                    <a href="${pageContext.request.contextPath}/quartos?acao=editar&id=${quarto.id}">Editar</a>
-                                    <a href="${pageContext.request.contextPath}/quartos?acao=excluir&id=${quarto.id}"
-                                       onclick="return confirm('Excluir este quarto?');">Excluir</a>
-                                </td>
-                            </tr>
-                        </c:forEach>
-                        </tbody>
-                    </table>
-                </c:otherwise>
-            </c:choose>
+<c:choose>
+    <c:when test="${empty quartos}">
+        <p class="vazio">Nenhum quarto cadastrado ainda.</p>
+    </c:when>
+    <c:otherwise>
+        <div class="tabela-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Número</th>
+                    <th>Tipo</th>
+                    <th>Situação</th>
+                    <th class="col-acoes">Ações</th>
+                </tr>
+                </thead>
+                <tbody>
+                <c:forEach var="q" items="${quartos}">
+                    <tr>
+                        <td>${q.id}</td>
+                        <td><span class="principal">${q.numero}</span></td>
+                        <td>${q.tipo}</td>
+                        <td>
+                            <c:choose>
+                                <c:when test="${q.status eq 'Disponível'}">
+                                    <span class="selo selo--ok">${q.status}</span>
+                                </c:when>
+                                <c:when test="${q.status eq 'Ocupado'}">
+                                    <span class="selo selo--ocupado">${q.status}</span>
+                                </c:when>
+                                <c:otherwise>
+                                    <span class="selo selo--atencao">${q.status}</span>
+                                </c:otherwise>
+                            </c:choose>
+                        </td>
+                        <td class="col-acoes">
+                            <a class="link-acao" href="${ctx}/quartos?acao=editar&id=${q.id}">Editar</a>
+                            <a class="link-acao link-acao--perigo"
+                               href="${ctx}/quartos?acao=excluir&id=${q.id}"
+                               onclick="return confirm('Excluir o quarto ${q.numero}?');">Excluir</a>
+                        </td>
+                    </tr>
+                </c:forEach>
+                </tbody>
+            </table>
         </div>
-    </main>
-</body>
-</html>
+    </c:otherwise>
+</c:choose>
+
+<jsp:include page="/WEB-INF/jsp/layout/rodape.jsp" />

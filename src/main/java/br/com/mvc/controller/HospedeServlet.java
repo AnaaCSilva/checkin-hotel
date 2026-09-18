@@ -2,6 +2,7 @@ package br.com.mvc.controller;
 
 import br.com.mvc.model.Hospede;
 import br.com.mvc.service.HospedeService;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,23 +23,17 @@ public class HospedeServlet extends BaseServlet {
             throws ServletException, IOException {
 
         switch (this.acao(req)) {
-            case "novo" -> this.form(req, resp, null);
             case "editar" -> this.form(req, resp, this.hospedeService.buscarPorId(this.paramLong(req, "id")));
             case "excluir" -> {
                 try {
                     this.hospedeService.deletar(this.paramLong(req, "id"));
-                } catch (IllegalArgumentException e) {
+                    this.redirect(req, resp, "/hospedes");
+                } catch (Exception e) {
                     req.setAttribute("erro", e.getMessage());
-                    req.setAttribute("hospedes", this.hospedeService.listar());
-                    this.forward(req, resp, LISTA);
-                    return;
+                    this.listar(req, resp);
                 }
-                this.redirect(req, resp, "/hospedes");
             }
-            default -> {
-                req.setAttribute("hospedes", this.hospedeService.listar());
-                this.forward(req, resp, LISTA);
-            }
+            default -> this.listar(req, resp);
         }
     }
 
@@ -52,10 +47,16 @@ public class HospedeServlet extends BaseServlet {
         try {
             this.hospedeService.salvar(hospede);
             this.redirect(req, resp, "/hospedes");
-        } catch (IllegalArgumentException e) {
+        } catch (Exception e) {
             req.setAttribute("erro", e.getMessage());
             this.form(req, resp, hospede);
         }
+    }
+
+    private void listar(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        req.setAttribute("hospedes", this.hospedeService.listar());
+        this.forward(req, resp, LISTA);
     }
 
     private void form(HttpServletRequest req, HttpServletResponse resp, Hospede hospede)
@@ -65,7 +66,6 @@ public class HospedeServlet extends BaseServlet {
             this.redirect(req, resp, "/hospedes");
             return;
         }
-
         req.setAttribute("hospede", hospede);
         this.forward(req, resp, FORM);
     }
@@ -74,8 +74,7 @@ public class HospedeServlet extends BaseServlet {
         Hospede hospede = new Hospede();
         hospede.setId(this.paramLong(req, "id"));
         hospede.setNome(this.param(req, "nome"));
-        hospede.setTipoDocumento(this.param(req, "tipoDocumento"));
-        hospede.setNumeroDocumento(this.param(req, "numeroDocumento"));
+        hospede.setCpf(this.param(req, "cpf"));
         hospede.setTelefone(this.param(req, "telefone"));
         hospede.setEmail(this.param(req, "email"));
         return hospede;

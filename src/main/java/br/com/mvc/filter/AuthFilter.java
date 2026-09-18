@@ -1,5 +1,8 @@
 package br.com.mvc.filter;
 
+import br.com.mvc.model.Usuario;
+import br.com.mvc.service.UsuarioService;
+
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.FilterConfig;
@@ -10,59 +13,82 @@ import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import java.io.IOException;
 
+import java.io.IOException;
+import java.util.Set;
+
+/**
+ * Controla o acesso ao sistema:
+ *
+ * 1) sem login -> so a tela /login e os arquivos de css/js
+ * 2) com login -> telas do dia a dia (check-in, hospedes)
+ * 3) AREA RESTRITA (quartos, recepcionistas e perfis) -> somente perfil Gerente
+ */
 @WebFilter("/*")
 public class AuthFilter implements Filter {
 
+    /** Rotas que so o gerente enxerga. */
+    private static final Set<String> ROTAS_GERENTE = Set.of("/usuarios", "/perfis", "/quartos");
+
+    private static final String ACESSO_NEGADO = "/WEB-INF/jsp/acesso-negado.jsp";
+
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        // Inicializacao do filtro, se necessaria
+        // nada a inicializar
     }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
 
-        HttpServletRequest httpRequest = (HttpServletRequest) request;
-        HttpServletResponse httpResponse = (HttpServletResponse) response;
+        HttpServletRequest req = (HttpServletRequest) request;
+        HttpServletResponse resp = (HttpServletResponse) response;
 
-        String path = httpRequest.getRequestURI().substring(httpRequest.getContextPath().length());
+        String path = req.getRequestURI().substring(req.getContextPath().length());
 
-        boolean isLoginPage = path.equals("/login") || path.equals("/login.jsp");
-        boolean isStaticResource = path.startsWith("/css/")
+        boolean paginaLogin = path.equals("/login") || path.equals("/login.jsp");
+        boolean recursoEstatico = path.startsWith("/css/")
                                 || path.startsWith("/js/")
                                 || path.startsWith("/images/")
-                                || path.startsWith("/assets/")
                                 || path.endsWith(".css")
                                 || path.endsWith(".js")
                                 || path.endsWith(".png")
                                 || path.endsWith(".jpg");
 
-        HttpSession session = httpRequest.getSession(false);
-        boolean loggedIn = (session != null && session.getAttribute("usuarioLogado") != null);
-
-        if (!isStaticResource) {
-            httpResponse.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-            httpResponse.setHeader("Pragma", "no-cache");
-            httpResponse.setDateHeader("Expires", 0);
+        if (!recursoEstatico) {
+            resp.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+            resp.setHeader("Pragma", "no-cache");
+            resp.setDateHeader("Expires", 0);
         }
 
-        if (loggedIn || isLoginPage || isStaticResource) {
+        if (paginaLogin || recursoEstatico) {
             chain.doFilter(request, response);
-        } else {
-            boolean isAjax = "XMLHttpRequest".equals(httpRequest.getHeader("X-Requested-With"));
-
-            if (isAjax) {
-                httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            } else {
-                httpResponse.sendRedirect(httpRequest.getContextPath() + "/login");
-            }
+            return;
         }
+
+        HttpSession session = req.getSession(false);
+        Usuario usuario = (session == null) ? null : (Usuario) session.getAttribute("usuarioLogado");
+
+        if (usuario == null) {
+            if ("XMLHttpRequest".equals(req.getHeader("X-Requested-With"))) {
+                resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            } else {
+                resp.sendRedirect(req.getContextPath() + "/login");
+            }
+            return;
+        }
+
+        if (ROTAS_GERENTE.contains(path) && !UsuarioService.ehGerente(usuario)) {
+            resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            req.getRequestDispatcher(ACESSO_NEGADO).forward(req, resp);
+            return;
+        }
+
+        chain.doFilter(request, response);
     }
 
     @Override
     public void destroy() {
-        // Limpeza de recursos, se necessaria
+        // nada a liberar
     }
 }

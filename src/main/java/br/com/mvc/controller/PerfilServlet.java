@@ -28,6 +28,7 @@ public class PerfilServlet extends BaseServlet {
         switch (this.acao(req)) {
             case "novo" -> this.form(req, resp, null);
             case "editar" -> this.form(req, resp, this.perfilService.buscarPorId(this.paramLong(req, "id")));
+            case "excluir" -> this.excluir(req, resp);
             default -> {
                 req.setAttribute("perfis", this.perfilService.listar());
                 this.forward(req, resp, LISTA);
@@ -42,14 +43,7 @@ public class PerfilServlet extends BaseServlet {
         req.setCharacterEncoding("UTF-8");
 
         if ("excluir".equals(this.acao(req))) {
-            try {
-                this.perfilService.deletar(this.paramLong(req, "id"));
-                this.redirect(req, resp, "/perfis");
-            } catch (Exception e) {
-                req.setAttribute("erro", e.getMessage());
-                req.setAttribute("perfis", this.perfilService.listar());
-                this.forward(req, resp, LISTA);
-            }
+            this.excluir(req, resp);
             return;
         }
 
@@ -61,6 +55,19 @@ public class PerfilServlet extends BaseServlet {
         } catch (Exception e) {
             req.setAttribute("erro", e.getMessage());
             this.form(req, resp, perfil);
+        }
+    }
+
+    /** Exclusao aceita por link (GET) e por formulario (POST). */
+    private void excluir(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        try {
+            this.perfilService.deletar(this.paramLong(req, "id"));
+            this.redirect(req, resp, "/perfis");
+        } catch (Exception e) {
+            req.setAttribute("erro", e.getMessage());
+            req.setAttribute("perfis", this.perfilService.listar());
+            this.forward(req, resp, LISTA);
         }
     }
 

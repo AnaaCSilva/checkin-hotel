@@ -1,85 +1,55 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>
-        <c:choose>
-            <c:when test="${empty usuario.id}">Novo usuario</c:when>
-            <c:otherwise>Editar usuario</c:otherwise>
-        </c:choose>
-        - MVC Aula
-    </title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/estilo.css">
-</head>
-<body>
-<header class="topbar">
-    <div class="container">
-        <strong>MVC Aula</strong>
-        <nav>
-            <a href="${pageContext.request.contextPath}/home">Home</a>
-            <a href="${pageContext.request.contextPath}/usuarios">Usuarios</a>
-            <a href="${pageContext.request.contextPath}/perfis">Perfis</a>
-            <a href="${pageContext.request.contextPath}/logout">Sair</a>
-        </nav>
-    </div>
-</header>
+<jsp:include page="/WEB-INF/jsp/layout/cabecalho.jsp">
+    <jsp:param name="titulo" value="Funcionário" />
+    <jsp:param name="ativo" value="usuarios" />
+</jsp:include>
 
-<main class="container">
-    <div class="page-header">
-        <h1>
+<div class="secao-cabecalho">
+    <div>
+        <h2>
             <c:choose>
-                <c:when test="${empty usuario.id}">Novo usuario</c:when>
-                <c:otherwise>Editar usuario</c:otherwise>
+                <c:when test="${empty usuario.id}">Novo funcionário</c:when>
+                <c:otherwise>Editar ${usuario.nome}</c:otherwise>
             </c:choose>
-        </h1>
+        </h2>
+        <p>O perfil define o que a pessoa enxerga no sistema.</p>
     </div>
+</div>
 
-    <div class="card">
-        <c:if test="${not empty erro}">
-            <div class="alert alert-erro">${erro}</div>
-        </c:if>
+<c:if test="${not empty erro}">
+    <div class="aviso aviso--erro">${erro}</div>
+</c:if>
 
-        <form method="post" action="${pageContext.request.contextPath}/usuarios">
-            <input type="hidden" name="acao" value="salvar">
-            <input type="hidden" name="id" value="${usuario.id}">
+<form class="formulario" method="post" action="${ctx}/usuarios">
+    <input type="hidden" name="id" value="${usuario.id}">
 
-            <div class="form-group">
-                <label for="nome">Nome</label>
-                <input type="text" id="nome" name="nome" value="${usuario.nome}" required>
-            </div>
+    <label for="nome">Nome *</label>
+    <input type="text" id="nome" name="nome" maxlength="150" required value="${usuario.nome}">
 
-            <div class="form-group">
-                <label for="login">Login</label>
-                <input type="text" id="login" name="login" value="${usuario.login}" required>
-            </div>
+    <label for="login">Login *</label>
+    <input type="text" id="login" name="login" maxlength="100" required value="${usuario.login}">
 
-            <div class="form-group">
-                <label for="senha">Senha</label>
-                <input type="text" id="senha" name="senha" value="${usuario.senha}" required>
-            </div>
+    <label for="senha">Senha <c:if test="${empty usuario.id}">*</c:if></label>
+    <input type="password" id="senha" name="senha" minlength="6"
+           <c:if test="${empty usuario.id}">required</c:if>>
+    <p class="dica">
+        Mínimo de 6 caracteres.
+        <c:if test="${not empty usuario.id}">Deixe em branco para manter a senha atual.</c:if>
+    </p>
 
-            <div class="form-group">
-                <label for="perfilId">Perfil</label>
-                <select id="perfilId" name="perfilId" required>
-                    <option value="">Selecione</option>
-                    <c:forEach var="perfil" items="${perfis}">
-                        <option value="${perfil.id}"
-                                <c:if test="${usuario.perfilId == perfil.id}">selected</c:if>>
-                            ${perfil.nome}
-                        </option>
-                    </c:forEach>
-                </select>
-            </div>
+    <label for="perfilId">Perfil *</label>
+    <select id="perfilId" name="perfilId" required>
+        <option value="">Selecione...</option>
+        <c:forEach var="p" items="${perfis}">
+            <option value="${p.id}" ${usuario.perfilId eq p.id ? 'selected' : ''}>${p.nome}</option>
+        </c:forEach>
+    </select>
 
-            <div class="actions">
-                <button type="submit" class="btn">Salvar</button>
-                <a class="btn btn-secondary" href="${pageContext.request.contextPath}/usuarios">Cancelar</a>
-            </div>
-        </form>
+    <div class="acoes">
+        <button class="botao" type="submit">Salvar</button>
+        <a class="botao botao--claro" href="${ctx}/usuarios">Cancelar</a>
     </div>
-</main>
-</body>
-</html>
+</form>
+
+<jsp:include page="/WEB-INF/jsp/layout/rodape.jsp" />

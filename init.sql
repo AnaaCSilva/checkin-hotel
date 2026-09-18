@@ -1,135 +1,115 @@
-    CREATE DATABASE IF NOT EXISTS mvc_java
-        CHARACTER SET utf8mb4
-        COLLATE utf8mb4_unicode_ci;
-
-    USE mvc_java;
-
 -- =========================================
--- TABELA DE PERFIS
+-- BANCO
 -- =========================================
 
-    CREATE TABLE perfis (
-        id BIGINT NOT NULL AUTO_INCREMENT,
-        nome VARCHAR(100) NOT NULL,
+CREATE DATABASE IF NOT EXISTS mvc_java
+    CHARACTER SET utf8mb4
+    COLLATE utf8mb4_unicode_ci;
 
-        PRIMARY KEY (id)
-    );
+USE mvc_java;
 
 -- =========================================
--- TABELA DE USUÁRIOS
+-- PERFIS (Gerente / Recepcionista)
 -- =========================================
 
-    CREATE TABLE usuarios (
-        id BIGINT NOT NULL AUTO_INCREMENT,
-        nome VARCHAR(150) NOT NULL,
-        login VARCHAR(100) NOT NULL,
-        senha VARCHAR(255) NOT NULL,
-        perfil_id BIGINT NOT NULL,
+CREATE TABLE IF NOT EXISTS perfis (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    nome VARCHAR(100) NOT NULL,
 
-        PRIMARY KEY (id),
-
-        CONSTRAINT uk_usuario_login
-            UNIQUE (login),
-
-        CONSTRAINT fk_usuario_perfil
-            FOREIGN KEY (perfil_id)
-            REFERENCES perfis(id)
-    );
-    
-    -- =========================================
-    -- TABELA DE CHECKIN
-    -- =========================================
-
-    CREATE TABLE checkin (
-        id BIGINT AUTO_INCREMENT PRIMARY KEY,
-        hospede_id BIGINT NOT NULL,
-        quarto_id BIGINT NOT NULL,
-        data_checkin DATETIME NOT NULL,
-        data_checkout DATETIME NULL,
-        FOREIGN KEY (hospede_id) REFERENCES hospedes(id),
-        FOREIGN KEY (quarto_id) REFERENCES quartos(id)
+    PRIMARY KEY (id),
+    CONSTRAINT uk_perfil_nome UNIQUE (nome)
 );
 
-    -- =========================================
-    -- TABELA DE QUARTOS
-    -- =========================================
-
-    CREATE TABLE quartos (
-        id BIGINT NOT NULL AUTO_INCREMENT,
-        numero VARCHAR(10) NOT NULL,
-        tipo VARCHAR(50) NOT NULL,
-        status VARCHAR(20) NOT NULL DEFAULT 'Disponível',
-
-        PRIMARY KEY (id),
-
-        CONSTRAINT uk_quarto_numero
-            UNIQUE (numero)
-    );
-
 -- =========================================
--- TABELA DE HÓSPEDES
+-- USUARIOS (funcionarios que acessam o sistema)
 -- =========================================
 
-    CREATE TABLE hospedes (
+CREATE TABLE IF NOT EXISTS usuarios (
     id BIGINT NOT NULL AUTO_INCREMENT,
     nome VARCHAR(150) NOT NULL,
-    tipo_documento VARCHAR(20) NOT NULL,
-    numero_documento VARCHAR(30) NOT NULL,
-    telefone VARCHAR(20),
-    email VARCHAR(150),
+    login VARCHAR(100) NOT NULL,
+    senha VARCHAR(255) NOT NULL,
+    perfil_id BIGINT NOT NULL,
 
     PRIMARY KEY (id),
 
-    CONSTRAINT uk_hospede_documento
-        UNIQUE (numero_documento),
+    CONSTRAINT uk_usuario_login UNIQUE (login),
 
-    CONSTRAINT chk_hospede_tipo_documento
-        CHECK (tipo_documento IN ('CPF', 'PASSAPORTE'))
-    );
+    CONSTRAINT fk_usuario_perfil
+        FOREIGN KEY (perfil_id)
+        REFERENCES perfis(id)
+);
 
 -- =========================================
--- DADOS PARA TESTE
+-- QUARTOS
 -- =========================================
 
-    INSERT INTO perfis (nome)
-        VALUES
-        ('Gerente'),
-        ('Recepcionista'),
-        ('Camareira');
+CREATE TABLE IF NOT EXISTS quartos (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    numero VARCHAR(10) NOT NULL,
+    tipo VARCHAR(50) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'Disponível',
 
-    INSERT INTO usuarios (
-        nome,
-        login,
-        senha,
-        perfil_id
-    )
+    PRIMARY KEY (id),
+    CONSTRAINT uk_quarto_numero UNIQUE (numero)
+);
 
-    VALUES
-        ('Gerente do Hotel', 'gerente', '123456', 1),
-        ('Recepcionista Turno 1', 'recepcao1', '123456', 2),
-        ('Recepcionista Turno 2', 'recepcao2', '123456', 3);
-
-    INSERT INTO hospedes (nome, tipo_documento, numero_documento, telefone, email)
-    VALUES
-        ('Carlos Silva', 'CPF', '111.111.111-11', '(34) 99999-0001', 'carlos@email.com'),
-        ('Ana Souza', 'PASSAPORTE', 'AB123456', '(34) 99999-0002', 'ana@email.com');
-
-
-    INSERT INTO quartos (numero, tipo, status)
-    VALUES
-        ('101', 'Solteiro', 'Disponível'),
-        ('102', 'Casal', 'Disponível'),
-        ('201', 'Suíte', 'Manutenção');
 -- =========================================
--- CONSULTA DE EXEMPLO
+-- HOSPEDES (dados pessoais: id, nome, cpf)
 -- =========================================
 
-    SELECT
-        u.id,
-        u.nome,
-        u.login,
-        p.nome AS perfil
-    FROM usuarios u
-    INNER JOIN perfis p
-        ON p.id = u.perfil_id
-    ORDER BY u.nome;
+CREATE TABLE IF NOT EXISTS hospedes (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    nome VARCHAR(150) NOT NULL,
+    cpf VARCHAR(11) NOT NULL,
+    telefone VARCHAR(20) NULL,
+    email VARCHAR(150) NULL,
+
+    PRIMARY KEY (id),
+    CONSTRAINT uk_hospede_cpf UNIQUE (cpf)
+);
+
+-- =========================================
+-- CHECKIN (hospedagem: quarto + dias + pagamento)
+-- Depende de hospedes e quartos, por isso vem por ultimo.
+-- =========================================
+
+CREATE TABLE IF NOT EXISTS checkin (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    hospede_id BIGINT NOT NULL,
+    quarto_id BIGINT NOT NULL,
+    quantidade_dias INT NOT NULL,
+    forma_pagamento VARCHAR(30) NOT NULL,
+    data_checkin DATETIME NOT NULL,
+    data_prevista_saida DATETIME NOT NULL,
+    data_checkout DATETIME NULL,
+
+    PRIMARY KEY (id),
+
+    CONSTRAINT fk_checkin_hospede
+        FOREIGN KEY (hospede_id) REFERENCES hospedes(id),
+
+    CONSTRAINT fk_checkin_quarto
+        FOREIGN KEY (quarto_id) REFERENCES quartos(id),
+
+    CONSTRAINT chk_checkin_dias
+        CHECK (quantidade_dias >= 1)
+);
+
+-- =========================================
+-- DADOS INICIAIS
+-- =========================================
+
+INSERT INTO perfis (nome) VALUES ('Gerente'), ('Recepcionista');
+
+-- Senhas em texto puro apenas por ser projeto de aula.
+INSERT INTO usuarios (nome, login, senha, perfil_id) VALUES
+    ('Gerente do Hotel',      'gerente',   'gerente123', 1),
+    ('Recepcionista Turno 1', 'recepcao1', '123456',     2);
+
+INSERT INTO quartos (numero, tipo, status) VALUES
+    ('101', 'Solteiro', 'Disponível'),
+    ('102', 'Casal',    'Disponível'),
+    ('103', 'Solteiro', 'Disponível'),
+    ('201', 'Suíte',    'Disponível'),
+    ('202', 'Suíte',    'Manutenção');

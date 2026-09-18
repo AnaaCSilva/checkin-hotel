@@ -1,62 +1,36 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>
-        <c:choose>
-            <c:when test="${empty perfil.id}">Novo perfil</c:when>
-            <c:otherwise>Editar perfil</c:otherwise>
-        </c:choose>
-        - MVC Aula
-    </title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/estilo.css">
-</head>
-<body>
-<header class="topbar">
-    <div class="container">
-        <strong>MVC Aula</strong>
-        <nav>
-            <a href="${pageContext.request.contextPath}/home">Home</a>
-            <a href="${pageContext.request.contextPath}/usuarios">Usuarios</a>
-            <a href="${pageContext.request.contextPath}/perfis">Perfis</a>
-            <a href="${pageContext.request.contextPath}/logout">Sair</a>
-        </nav>
-    </div>
-</header>
+<jsp:include page="/WEB-INF/jsp/layout/cabecalho.jsp">
+    <jsp:param name="titulo" value="Perfil" />
+    <jsp:param name="ativo" value="perfis" />
+</jsp:include>
 
-<main class="container">
-    <div class="page-header">
-        <h1>
+<div class="secao-cabecalho">
+    <div>
+        <h2>
             <c:choose>
                 <c:when test="${empty perfil.id}">Novo perfil</c:when>
                 <c:otherwise>Editar perfil</c:otherwise>
             </c:choose>
-        </h1>
+        </h2>
+        <p>O perfil chamado "Gerente" é o que libera a área restrita.</p>
     </div>
+</div>
 
-    <div class="card">
-        <c:if test="${not empty erro}">
-            <div class="alert alert-erro">${erro}</div>
-        </c:if>
+<c:if test="${not empty erro}">
+    <div class="aviso aviso--erro">${erro}</div>
+</c:if>
 
-        <form method="post" action="${pageContext.request.contextPath}/perfis">
-            <input type="hidden" name="acao" value="salvar">
-            <input type="hidden" name="id" value="${perfil.id}">
+<form class="formulario" method="post" action="${ctx}/perfis">
+    <input type="hidden" name="id" value="${perfil.id}">
 
-            <div class="form-group">
-                <label for="nome">Nome</label>
-                <input type="text" id="nome" name="nome" value="${perfil.nome}" required>
-            </div>
+    <label for="nome">Nome *</label>
+    <input type="text" id="nome" name="nome" maxlength="100" required value="${perfil.nome}">
 
-            <div class="actions">
-                <button type="submit" class="btn">Salvar</button>
-                <a class="btn btn-secondary" href="${pageContext.request.contextPath}/perfis">Cancelar</a>
-            </div>
-        </form>
+    <div class="acoes">
+        <button class="botao" type="submit">Salvar</button>
+        <a class="botao botao--claro" href="${ctx}/perfis">Cancelar</a>
     </div>
-</main>
-</body>
-</html>
+</form>
+
+<jsp:include page="/WEB-INF/jsp/layout/rodape.jsp" />

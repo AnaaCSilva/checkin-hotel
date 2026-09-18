@@ -2,11 +2,14 @@ package br.com.mvc.service;
 
 import br.com.mvc.dao.PerfilDAO;
 import br.com.mvc.dao.UsuarioDAO;
+import br.com.mvc.model.Perfil;
 import br.com.mvc.model.Usuario;
 
 import java.util.List;
 
 public class UsuarioService {
+
+    public static final String PERFIL_GERENTE = "Gerente";
 
     private static final int SENHA_MINIMA = 6;
 
@@ -38,15 +41,19 @@ public class UsuarioService {
         return usuario;
     }
 
+    /** Usado pelo filtro e pelas telas para liberar a área restrita. */
+    public static boolean ehGerente(Usuario usuario) {
+        return usuario != null
+            && usuario.getPerfil() != null
+            && PERFIL_GERENTE.equalsIgnoreCase(usuario.getPerfil().getNome());
+    }
+
     public List<Usuario> listar() {
         return this.usuarioDAO.listarTodos();
     }
 
     public Usuario buscarPorId(Long id) {
-        if (id == null) {
-            return null;
-        }
-        return this.usuarioDAO.buscarPorId(id);
+        return (id == null) ? null : this.usuarioDAO.buscarPorId(id);
     }
 
     public void salvar(Usuario usuario) {
@@ -55,6 +62,19 @@ public class UsuarioService {
         }
 
         this.prepararDados(usuario);
+
+        Usuario atual = null;
+        if (usuario.getId() != null) {
+            atual = this.usuarioDAO.buscarPorId(usuario.getId());
+            if (atual == null) {
+                throw new IllegalArgumentException("Usuário não encontrado para alteração.");
+            }
+            // Na edicao, senha em branco significa "manter a senha atual".
+            if (usuario.getSenha() == null) {
+                usuario.setSenha(atual.getSenha());
+            }
+        }
+
         this.validarCamposObrigatorios(usuario);
         this.validarSenha(usuario.getSenha());
         this.validarPerfilExistente(usuario.getPerfilId());
@@ -62,23 +82,37 @@ public class UsuarioService {
 
         if (usuario.getId() == null) {
             this.usuarioDAO.inserir(usuario);
-            return;
+        } else {
+            this.usuarioDAO.alterar(usuario);
         }
-
-        if (this.usuarioDAO.buscarPorId(usuario.getId()) == null) {
-            throw new IllegalArgumentException("Usuário não encontrado para alteração.");
-        }
-        this.usuarioDAO.alterar(usuario);
     }
 
-    public void deletar(Long id) {
+    /**
+     * Regra: o hotel nao pode ficar sem gerente.
+     * O gerente tambem nao pode excluir o proprio login.
+     */
+    public void deletar(Long id, Usuario usuarioLogado) {
         if (id == null) {
             throw new IllegalArgumentException("Id é obrigatório para excluir.");
         }
-        if (this.usuarioDAO.buscarPorId(id) == null) {
+
+        Usuario alvo = this.usuarioDAO.buscarPorId(id);
+        if (alvo == null) {
             throw new IllegalArgumentException("Usuário não encontrado.");
         }
+        if (usuarioLogado != null && id.equals(usuarioLogado.getId())) {
+            throw new IllegalArgumentException("Você não pode excluir o próprio usuário.");
+        }
+        if (ehGerente(alvo) && this.contarGerentes() <= 1) {
+            throw new IllegalArgumentException("O sistema precisa de pelo menos um gerente.");
+        }
+
         this.usuarioDAO.deletar(id);
+    }
+
+    private int contarGerentes() {
+        Perfil gerente = this.perfilDAO.buscarPorNome(PERFIL_GERENTE);
+        return (gerente == null) ? 0 : this.usuarioDAO.contarPorPerfil(gerente.getId());
     }
 
     private void prepararDados(Usuario usuario) {
@@ -96,7 +130,8 @@ public class UsuarioService {
 
     private void validarSenha(String senha) {
         if (senha.length() < SENHA_MINIMA) {
-            throw new IllegalArgumentException("Senha deve ter no mínimo " + SENHA_MINIMA + " caracteres.");
+            throw new IllegalArgumentException(
+                    "Senha deve ter no mínimo " + SENHA_MINIMA + " caracteres.");
         }
     }
 
@@ -109,7 +144,7 @@ public class UsuarioService {
     private void validarLoginUnico(Usuario usuario) {
         Usuario existente = this.usuarioDAO.buscarPorLogin(usuario.getLogin());
         if (existente == null) return;
-        
+
         if (usuario.getId() == null || !existente.getId().equals(usuario.getId())) {
             throw new IllegalArgumentException("Já existe um usuário com este login.");
         }

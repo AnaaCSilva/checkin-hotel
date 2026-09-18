@@ -1,67 +1,53 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Perfis - MVC Aula</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/estilo.css">
-</head>
-<body>
-<header class="topbar">
-    <div class="container">
-        <strong>MVC Aula</strong>
-        <nav>
-            <a href="${pageContext.request.contextPath}/home">Home</a>
-            <a href="${pageContext.request.contextPath}/usuarios">Usuarios</a>
-            <a href="${pageContext.request.contextPath}/perfis">Perfis</a>
-            <a href="${pageContext.request.contextPath}/logout">Sair</a>
-        </nav>
+<jsp:include page="/WEB-INF/jsp/layout/cabecalho.jsp">
+    <jsp:param name="titulo" value="Perfis" />
+    <jsp:param name="ativo" value="perfis" />
+</jsp:include>
+
+<div class="secao-cabecalho">
+    <div>
+        <h2>Perfis de acesso</h2>
+        <p>Gerente vê a área restrita; os demais perfis, não.</p>
     </div>
-</header>
+    <a class="botao" href="${ctx}/perfis?acao=novo">+ Novo perfil</a>
+</div>
 
-<main class="container">
-    <div class="page-header">
-        <h1>Perfis</h1>
-        <a class="btn" href="${pageContext.request.contextPath}/perfis?acao=novo">Novo perfil</a>
-    </div>
+<c:if test="${not empty erro}">
+    <div class="aviso aviso--erro">${erro}</div>
+</c:if>
 
-    <c:if test="${not empty erro}">
-        <div class="alert alert-erro">${erro}</div>
-    </c:if>
-
-    <div class="table-wrap">
-        <c:choose>
-            <c:when test="${empty perfis}">
-                <p class="empty">Nenhum perfil cadastrado.</p>
-            </c:when>
-            <c:otherwise>
-                <table>
-                    <thead>
+<c:choose>
+    <c:when test="${empty perfis}">
+        <p class="vazio">Nenhum perfil cadastrado.</p>
+    </c:when>
+    <c:otherwise>
+        <div class="tabela-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Nome</th>
+                    <th class="col-acoes">Ações</th>
+                </tr>
+                </thead>
+                <tbody>
+                <c:forEach var="p" items="${perfis}">
                     <tr>
-                        <th>ID</th>
-                        <th>Nome</th>
-                        <th>Acoes</th>
+                        <td>${p.id}</td>
+                        <td><span class="principal">${p.nome}</span></td>
+                        <td class="col-acoes">
+                            <a class="link-acao" href="${ctx}/perfis?acao=editar&id=${p.id}">Editar</a>
+                            <a class="link-acao link-acao--perigo"
+                               href="${ctx}/perfis?acao=excluir&id=${p.id}"
+                               onclick="return confirm('Excluir o perfil ${p.nome}?');">Excluir</a>
+                        </td>
                     </tr>
-                    </thead>
-                    <tbody>
-                    <c:forEach var="perfil" items="${perfis}">
-                        <tr>
-                            <td>${perfil.id}</td>
-                            <td>${perfil.nome}</td>
-                            <td class="links">
-                                <a href="${pageContext.request.contextPath}/perfis?acao=editar&id=${perfil.id}">Editar</a>
-                                <a href="${pageContext.request.contextPath}/perfis?acao=excluir&id=${perfil.id}"
-                                   onclick="return confirm('Excluir este perfil?');">Excluir</a>
-                            </td>
-                        </tr>
-                    </c:forEach>
-                    </tbody>
-                </table>
-            </c:otherwise>
-        </c:choose>
-    </div>
-</main>
-</body>
-</html>
+                </c:forEach>
+                </tbody>
+            </table>
+        </div>
+    </c:otherwise>
+</c:choose>
+
+<jsp:include page="/WEB-INF/jsp/layout/rodape.jsp" />

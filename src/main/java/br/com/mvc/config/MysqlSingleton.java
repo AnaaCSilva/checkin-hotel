@@ -38,16 +38,21 @@ public class MysqlSingleton {
         return this.conexao;
     }
 
-    public ResultSet executar(String sql, Object... parametros) throws SQLException {
+    public synchronized ResultSet executar(String sql, Object... parametros) throws SQLException {
         Connection conn = this.obterConexao();
         PreparedStatement ps = conn.prepareStatement(sql);
+
+        // Faz o PreparedStatement ser fechado junto com o ResultSet.
+        // Sem isso, cada SELECT deixava um statement aberto no MySQL.
+        ps.closeOnCompletion();
+
         for (int i = 0; i < parametros.length; i++) {
             ps.setObject(i + 1, parametros[i]);
         }
         return ps.executeQuery();
     }
 
-    public int executarUpdate(String sql, Object... parametros) throws SQLException {
+    public synchronized int executarUpdate(String sql, Object... parametros) throws SQLException {
         Connection conn = this.obterConexao();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             for (int i = 0; i < parametros.length; i++) {

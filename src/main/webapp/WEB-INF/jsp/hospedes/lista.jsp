@@ -1,74 +1,60 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Hospedes - Check-in Hotel</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/estilo.css">
-</head>
-<body>
-    <header class="topbar">
-        <div class="container">
-            <strong>Check-in Hotel</strong>
-            <nav>
-                <a href="${pageContext.request.contextPath}/home">Home</a>
-                <a href="${pageContext.request.contextPath}/hospedes">Hospedes</a>
-                <a href="${pageContext.request.contextPath}/usuarios">Usuarios</a>
-                <a href="${pageContext.request.contextPath}/perfis">Perfis</a>
-                <a href="${pageContext.request.contextPath}/logout">Sair</a>
-            </nav>
-        </div>
-    </header>
+<jsp:include page="/WEB-INF/jsp/layout/cabecalho.jsp">
+    <jsp:param name="titulo" value="Hóspedes" />
+    <jsp:param name="ativo" value="hospedes" />
+</jsp:include>
 
-    <main class="container">
-        <div class="page-header">
-            <h1>Hospedes</h1>
-            <a class="btn" href="${pageContext.request.contextPath}/hospedes?acao=novo">Novo hospede</a>
-        </div>
+<div class="secao-cabecalho">
+    <div>
+        <h2>Hóspedes</h2>
+        <p>Todo mundo que já passou pelo hotel.</p>
+    </div>
+    <a class="botao" href="${ctx}/checkin?acao=novo">+ Novo check-in</a>
+</div>
 
-        <c:if test="${not empty erro}">
-            <div class="alert alert-erro">${erro}</div>
-        </c:if>
+<c:if test="${not empty erro}">
+    <div class="aviso aviso--erro">${erro}</div>
+</c:if>
 
-        <div class="table-wrap">
-            <c:choose>
-                <c:when test="${empty hospedes}">
-                    <p class="empty">Nenhum hospede cadastrado.</p>
-                </c:when>
-                <c:otherwise>
-                    <table>
-                        <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nome</th>
-                            <th>CPF</th>
-                            <th>Telefone</th>
-                            <th>Email</th>
-                            <th>Acoes</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <c:forEach var="hospede" items="${hospedes}">
-                            <tr>
-                                <td>${hospede.id}</td>
-                                <td>${hospede.nome}</td>
-                                <td>${hospede.tipoDocumento}: ${hospede.numeroDocumento}</td>
-                                <td>${hospede.telefone}</td>
-                                <td>${hospede.email}</td>
-                                <td class="links">
-                                    <a href="${pageContext.request.contextPath}/hospedes?acao=editar&id=${hospede.id}">Editar</a>
-                                    <a href="${pageContext.request.contextPath}/hospedes?acao=excluir&id=${hospede.id}"
-                                    onclick="return confirm('Excluir este hospede?');">Excluir</a>
-                                </td>
-                            </tr>
-                        </c:forEach>
-                        </tbody>
-                    </table>
-                </c:otherwise>
-            </c:choose>
+<c:choose>
+    <c:when test="${empty hospedes}">
+        <p class="vazio">Nenhum hóspede cadastrado ainda.</p>
+    </c:when>
+    <c:otherwise>
+        <div class="tabela-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Nome</th>
+                    <th>CPF</th>
+                    <th>Contato</th>
+                    <th class="col-acoes">Ações</th>
+                </tr>
+                </thead>
+                <tbody>
+                <c:forEach var="h" items="${hospedes}">
+                    <tr>
+                        <td>${h.id}</td>
+                        <td><span class="principal">${h.nome}</span></td>
+                        <td>${h.cpfFormatado}</td>
+                        <td>
+                            ${h.telefone}
+                            <span class="secundario">${h.email}</span>
+                        </td>
+                        <td class="col-acoes">
+                            <a class="link-acao" href="${ctx}/hospedes?acao=editar&id=${h.id}">Editar</a>
+                            <a class="link-acao link-acao--perigo"
+                               href="${ctx}/hospedes?acao=excluir&id=${h.id}"
+                               onclick="return confirm('Excluir o hóspede ${h.nome}?');">Excluir</a>
+                        </td>
+                    </tr>
+                </c:forEach>
+                </tbody>
+            </table>
         </div>
-    </main>
-</body>
-</html>
+    </c:otherwise>
+</c:choose>
+
+<jsp:include page="/WEB-INF/jsp/layout/rodape.jsp" />
