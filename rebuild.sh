@@ -82,5 +82,5 @@ done
 echo
 echo "Pronto."
 echo "  URL:   http://localhost:8080/mvc/login"
-echo "  Login: gerente / 123456"
+echo "  Login: gerente / gerente123"
 echo "  Logs:  docker compose logs -f tomcat"

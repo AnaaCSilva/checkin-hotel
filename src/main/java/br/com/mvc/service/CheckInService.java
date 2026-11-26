@@ -2,6 +2,7 @@ package br.com.mvc.service;
 
 import br.com.mvc.dao.CheckInDAO;
 import br.com.mvc.dao.QuartoDAO;
+import br.com.mvc.exception.RecursoNaoEncontradoException;
 import br.com.mvc.model.CheckIn;
 import br.com.mvc.model.Hospede;
 import br.com.mvc.model.Quarto;
@@ -101,9 +102,8 @@ public class CheckInService {
         quarto.setStatus(STATUS_OCUPADO);
         this.quartoDAO.alterar(quarto);
 
-        checkIn.setHospedeNome(hospede.getNome());
-        checkIn.setQuartoNumero(quarto.getNumero());
-        return checkIn;
+        // Recarrega do banco: devolve o registro completo (com id e dados do JOIN).
+        return this.checkInDAO.buscarAtivoPorQuarto(quarto.getId());
     }
 
     /** Check-out: fecha a hospedagem e libera o quarto. */
@@ -114,7 +114,7 @@ public class CheckInService {
 
         CheckIn checkIn = this.checkInDAO.buscarPorId(checkInId);
         if (checkIn == null) {
-            throw new IllegalArgumentException("Hospedagem não encontrada.");
+            throw new RecursoNaoEncontradoException("Hospedagem não encontrada.");
         }
         if (!checkIn.isAtivo()) {
             throw new IllegalStateException("Esta hospedagem já foi finalizada.");

@@ -55,6 +55,11 @@ public class CheckInDAO extends MysqlDAO {
                 SELECT_BASE + "WHERE c.hospede_id = ? ORDER BY c.data_checkin DESC", hospedeId);
     }
 
+    public List<CheckIn> listarPorQuarto(Long quartoId) {
+        return this.consultarLista(
+                SELECT_BASE + "WHERE c.quarto_id = ? ORDER BY c.data_checkin DESC", quartoId);
+    }
+
     public CheckIn buscarPorId(Long id) {
         return this.consultarUm(SELECT_BASE + "WHERE c.id = ?", id);
     }

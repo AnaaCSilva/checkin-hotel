@@ -1,0 +1,459 @@
+{
+  "info": {
+    "name": "Check-in Hotel API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Rode 'Login (gerente)' primeiro: o Postman guarda o cookie de sessao. Ajuste as variaveis hospedeId, quartoId e checkinId conforme os dados do banco."
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080/mvc"
+    },
+    {
+      "key": "hospedeId",
+      "value": "1"
+    },
+    {
+      "key": "quartoId",
+      "value": "1"
+    },
+    {
+      "key": "checkinId",
+      "value": "1"
+    }
+  ],
+  "item": [
+    {
+      "name": "Autenticacao",
+      "item": [
+        {
+          "name": "Login (gerente)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "login",
+                  "value": "gerente"
+                },
+                {
+                  "key": "senha",
+                  "value": "gerente123"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login (recepcionista)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "login",
+                  "value": "recepcao1"
+                },
+                {
+                  "key": "senha",
+                  "value": "123456"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "logout"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Hospedes",
+      "item": [
+        {
+          "name": "Listar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/hospedes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "hospedes"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/hospedes/{{hospedeId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "hospedes",
+                "{{hospedeId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Criar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/hospedes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "hospedes"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Maria Lima\",\n  \"cpf\": \"529.982.247-25\",\n  \"telefone\": \"(34) 99999-0003\",\n  \"email\": \"maria@email.com\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Atualizar",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/hospedes/{{hospedeId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "hospedes",
+                "{{hospedeId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Maria Lima Souza\",\n  \"cpf\": \"529.982.247-25\",\n  \"telefone\": \"(34) 99999-0003\",\n  \"email\": \"maria@email.com\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Excluir",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/hospedes/{{hospedeId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "hospedes",
+                "{{hospedeId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Quartos",
+      "item": [
+        {
+          "name": "Listar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/quartos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "quartos"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Listar disponiveis",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/quartos?status=Disponível",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "quartos"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "Disponível"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/quartos/{{quartoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "quartos",
+                "{{quartoId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Criar (gerente)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/quartos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "quartos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numero\": \"301\",\n  \"tipo\": \"Casal\",\n  \"status\": \"Disponível\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Atualizar (gerente)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/quartos/{{quartoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "quartos",
+                "{{quartoId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numero\": \"301\",\n  \"tipo\": \"Suíte\",\n  \"status\": \"Manutenção\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Excluir (gerente)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/quartos/{{quartoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "quartos",
+                "{{quartoId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Hospedagens",
+      "item": [
+        {
+          "name": "Listar historico",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/checkins",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "checkins"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Listar ativas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/checkins?ativos=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "checkins"
+              ],
+              "query": [
+                {
+                  "key": "ativos",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/checkins/{{checkinId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "checkins",
+                "{{checkinId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Realizar check-in",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/checkins",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "checkins"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hospede\": {\n    \"nome\": \"Maria Lima\",\n    \"cpf\": \"529.982.247-25\",\n    \"telefone\": \"(34) 99999-0003\",\n    \"email\": \"maria@email.com\"\n  },\n  \"quartoId\": 1,\n  \"quantidadeDias\": 3,\n  \"formaPagamento\": \"Pix\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Realizar check-out",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/checkins/{{checkinId}}/checkout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "checkins",
+                "{{checkinId}}",
+                "checkout"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

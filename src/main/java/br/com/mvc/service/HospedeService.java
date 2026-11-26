@@ -2,6 +2,8 @@ package br.com.mvc.service;
 
 import br.com.mvc.dao.CheckInDAO;
 import br.com.mvc.dao.HospedeDAO;
+import br.com.mvc.exception.ConflitoException;
+import br.com.mvc.exception.RecursoNaoEncontradoException;
 import br.com.mvc.model.Hospede;
 
 import java.util.List;
@@ -73,7 +75,7 @@ public class HospedeService {
         }
 
         if (this.hospedeDAO.buscarPorId(hospede.getId()) == null) {
-            throw new IllegalArgumentException("Hóspede não encontrado para alteração.");
+            throw new RecursoNaoEncontradoException("Hóspede não encontrado para alteração.");
         }
         this.hospedeDAO.alterar(hospede);
     }
@@ -103,12 +105,12 @@ public class HospedeService {
             throw new IllegalArgumentException("Id é obrigatório para excluir.");
         }
         if (this.hospedeDAO.buscarPorId(id) == null) {
-            throw new IllegalArgumentException("Hóspede não encontrado.");
+            throw new RecursoNaoEncontradoException("Hóspede não encontrado.");
         }
         // O banco tem FK de checkin -> hospedes: sem esta checagem o erro
         // chegaria na tela como falha de SQL.
         if (!this.checkInDAO.listarPorHospede(id).isEmpty()) {
-            throw new IllegalArgumentException(
+            throw new ConflitoException(
                     "Não é possível excluir: este hóspede tem hospedagens registradas.");
         }
         this.hospedeDAO.deletar(id);
@@ -127,7 +129,7 @@ public class HospedeService {
             return;
         }
         if (hospede.getId() == null || !existente.getId().equals(hospede.getId())) {
-            throw new IllegalArgumentException("Já existe um hóspede cadastrado com este CPF.");
+            throw new ConflitoException("Já existe um hóspede cadastrado com este CPF.");
         }
     }
 

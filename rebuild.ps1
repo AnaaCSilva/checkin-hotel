@@ -71,5 +71,5 @@ for ($i = 1; $i -le 60; $i++) {
 Write-Host ""
 Write-Host "Pronto."
 Write-Host "  URL:   http://localhost:8080/mvc/login"
-Write-Host "  Login: gerente / 123456"
+Write-Host "  Login: gerente / gerente123"
 Write-Host "  Logs:  docker compose logs -f tomcat"
